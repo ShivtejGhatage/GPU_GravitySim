@@ -6,7 +6,7 @@ class Galaxy:
         self.vel = np.zeros((N,2), dtype=np.float32)
         self.pos = np.zeros((N,2), dtype=np.float32)
         self.masses = np.zeros(N, dtype=np.float32)
-        self.active = np.ones(N, dtype=np.float32)
+        # self.active = np.ones(N, dtype=np.float32)
         self.new = N-1
 
     def __str__(self):
