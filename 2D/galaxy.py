@@ -1,10 +1,18 @@
 import numpy as np
+import config
+
+deltaT = config.deltaT
+G = config.G
+eps = config.eps
+e = config.e
+M = config.M
+
 
 class Galaxy:
     def __init__(self, N = 10):
         self.N = N
-        self.vel = np.zeros((N,3), dtype=np.float32)
-        self.pos = np.zeros((N,3), dtype=np.float32)
+        self.vel = np.zeros((N,2), dtype=np.float32)
+        self.pos = np.zeros((N,2), dtype=np.float32)
         self.masses = np.zeros(N, dtype=np.float32)
         # self.active = np.ones(N, dtype=np.float32)
         self.new = N-1
@@ -24,8 +32,7 @@ class Galaxy:
             f"max={self.masses.max():.2f}, "
             f"mean={self.masses.mean():.2f}\n"
             f"  position  : x∈[{pos_min[0]:.2f}, {pos_max[0]:.2f}], "
-            f"y∈[{pos_min[1]:.2f}, {pos_max[1]:.2f}], ",
-            f"z∈[{pos_min[2]:.2f}, {pos_max[2]:.2f}]\n"
+            f"y∈[{pos_min[1]:.2f}, {pos_max[1]:.2f}] \n"
             f"  speed     : min={vel_mag.min():.2f}, "
             f"max={vel_mag.max():.2f}, "
             f"mean={vel_mag.mean():.2f}\n"
@@ -43,20 +50,13 @@ class Galaxy:
 
 
     def rando(self):
-        M = 3.0
-        G = 0.1
-        eps = 2.0
 
         theta = np.random.uniform(0, 2*np.pi, self.N)
-        u = np.random.uniform(-1, 1, self.N)
-        phi = np.arccos(u)
+        # r = np.sqrt(np.random.uniform(10**2, 50**2, self.N))
+        r = np.random.uniform(10, 100, self.N)
 
-        # r = np.random.uniform(10**3, 50**3, self.N) ** (1/3)
-        r = np.random.uniform(0, 1, self.N)
-
-        self.pos[:,0] = r * np.sin(phi) * np.cos(theta)
-        self.pos[:,1] = r * np.sin(phi) * np.sin(theta)
-        self.pos[:,2] = r * np.cos(phi)
+        self.pos[:,0] = r * np.cos(theta)
+        self.pos[:,1] = r * np.sin(theta)
 
         self.masses[:] = np.abs(np.random.normal(2, 0.1, self.N))
 
@@ -64,33 +64,19 @@ class Galaxy:
             rvec = self.pos[i]
             dist = np.linalg.norm(rvec) + eps
 
+            # circular orbit speed
             vmag = np.sqrt(G * M / dist)
 
-            ref = np.array([0,0,1]) if abs(rvec[2]/dist) < 0.9 else np.array([0,1,0])
-            t = np.cross(ref, rvec)
-            t /= np.linalg.norm(t)
+            # 2D perpendicular (tangential direction)
+            t = np.array([-rvec[1], rvec[0]]) / dist
 
             self.vel[i] = vmag * t
-
-    # def rando(self):
-    #     theta = np.random.uniform(0, 2*np.pi, self.N)
-    #     u = np.random.uniform(-1, 1, self.N)
-    #     phi = np.arccos(u)
-
-    #     r = np.random.uniform(0, 0.2, self.N) # uniform volume
-
-    #     self.pos[:,0] = r * np.sin(phi) * np.cos(theta)
-    #     self.pos[:,1] = r * np.sin(phi) * np.sin(theta)
-    #     self.pos[:,2] = r * np.cos(phi)
-
-    #     self.masses[:] = 1.0
-    #     self.vel[:] = 0.0
 
 
 
     def big_bang(self):
         # random positions in small sphere
-        self.pos[:] = np.random.normal(0, 1.0, (self.N, 3))
+        self.pos[:] = np.random.normal(0, 1.0, (self.N, 2))
         r = np.linalg.norm(self.pos, axis=1)
         self.pos /= r[:,None]
         self.pos *= np.random.uniform(1, 5, (self.N,1))

@@ -1,23 +1,26 @@
 import numpy as np
 from galaxy import Galaxy
+import config
 
-deltaT = 0.1
-G = 0.1
-eps = 2
-e = 0.7
+deltaT = config.deltaT
+G = config.G
+eps = config.eps
+e = config.e
+L = config.L
+
 
 
 
 def update(gx):
     N = gx.N
-    acc = np.zeros((N, 3), dtype=np.float32)
+    acc = np.zeros((N, 2), dtype=np.float32)
     
     for i in range(N):
         for j in range(i+1, N):
 
             # if (gx.active[i] and gx.active[j]):
                 dr = gx.pos[j]-gx.pos[i]
-                r2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2] + eps*eps
+                r2 = dr[0]*dr[0] + dr[1]*dr[1] + eps*eps
                 invR3 = 1.0/(np.sqrt(r2)*r2)
 
                 acc[i] += G * gx.masses[j] * dr * invR3
@@ -26,7 +29,12 @@ def update(gx):
     gx.vel += 0.5*acc*deltaT
     gx.pos += gx.vel*deltaT
     gx.vel += 0.5*acc*deltaT
-    print(np.max(np.linalg.norm(gx.pos, axis=1)))
+
+    gx.pos[:,0] = (gx.pos[:,0] + L) % (2*L) - L
+    gx.pos[:,1] = (gx.pos[:,1] + L) % (2*L) - L
+
+
+    # print(np.max(np.linalg.norm(gx.pos, axis=1)))
 
 
     # for i in range(N):
