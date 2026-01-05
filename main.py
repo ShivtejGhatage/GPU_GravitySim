@@ -4,7 +4,7 @@ import glfw
 import moderngl
 from kernel import update
 
-N = 100
+N = 100000
 
 # ================= SHADERS =================
 
